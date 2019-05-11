@@ -1,0 +1,87 @@
+09.12.2017.
+
+Napravljena je ulica sa tri trake i osvetljena lopta koja predstavlja igraca
+Zapocete su komande za pomeranje igraca (D, A, S, W), ali nisu ispravne
+Izlaz iz projekta je omogucen pritiskom tastera Esc
+
+Fajlovi: main.c
+
+
+18.12.2017.
+
+Vazna promena: funkcije kao sto su crtanje ulice i igraca su rasporedjene u vise fajlova i ukljucene u main program
+
+Podesene su komande za pomeranje igraca po ulici i bolje uskladjene
+Dodat je Makefile
+Ostalo nista nije bitno promenjeno
+
+Fajlovi: main.c igrac.c ulica.c Makefile
+		 main.h igrac.h ulica.h
+
+08.01.2018.
+
+Napravljen je crveni kamion i omoguceno je kretanje dva kamiona u prvoj traci ulice
+Pocetak animacije je omogueno pritiskom tastera G, a pauziranje animacije pritiskom tastera P, i time je dodata funkcija on_timer()
+Dodati su fajlovi u Makefile
+
+Fajlovi: main.c igrac.c ulica.c kamion.c Makefile
+		 main.h igrac.h ulica.h kamion.h
+
+26.01.2018.
+
+Vazne izmene:
+	- izmena u strukturi fajla ulica.c radi lakse modifikacije ulice, tj. duzine ulice, i sada je duzine kao i sam prozor projekta
+	- napravljen je automobil i jako je slican kamionu
+	- sada se koriste strukture za crtanje kaimona i automobila posto je lakse omoguciti njihovo kretanje
+	- u prvoj traci su samo kamioni, u drugoj traci su samo automobili i u trecoj traci su naizmenicno automobili i kamioni
+	- u main.c je dodata funkcija init() koja kada se pokrene projekat inicijalizuje sve strukture, i svaka struktura odgovara jednoj traci ulice
+
+Modifikacija koordinata za kretanje igraca, i jos uvek nisu omogucene kolizije igraca sa kamionima i automobilima
+
+Fajlovi: main.c igrac.c ulica.c kamion.c auto.c Makefile
+		 main.h igrac.h ulica.h kamion.h auto.h 
+
+28.01.2018. 04:02 am
+
+Vazna izmena: dodate su kolizije igraca sa kamionima i automobilima, i ta funkcija za proveru kolizija je smestena u poseban fajl kolizije.c
+
+Dodate su promenljive za koordinate strukturama radi lakse provere kolizija sa igracem i ispitivanje da li je doslo do kolizije se vrsi iz funkcije on_timer()
+Popravljeni su neki mali bagovi, ali ostalo nista nije bitno izmenjeno
+
+Fajlovi: main.c igrac.c ulica.c kamion.c auto.c kolizije.c Makefile
+		 main.h igrac.h ulica.h kamion.h auto.h kolizije.h
+
+28.01.2018. 18:48 pm
+
+Vazna izmena:
+	- preuzeti su fajlovi sa sajta vezbi za ukljucivanje tekstura i rad sa njima, i ukljucena je funkcija initialize() za inicijalizaciju teksture
+	- dodata je textura trave koja je postavljena oko ulice i to je smesteno u file trava.c, i funkcija se poziva iz main.c
+
+Ostalo nema nekih vaznih promena, modifikacija ulice i malih bagova
+Izvrsena je modifikacija kamere koja se pomera zajedno sa igracem 
+Dodati su komentari u vise fajlova
+
+Fajlovi: main.c igrac.c ulica.c kamion.c auto.c kolizije.c image.c trava.h Makefile
+		 main.h igrac.h ulica.h kamion.h auto.h kolizije.h image.h trava.h
+
+
+02.02.2018.
+
+Vazne izmene:
+	- napravljeno je drvece i postavljeno na travi oko ulice, i postoji dva tipa:
+		drvo kao jelka napravljeno od cilindra i kupa
+		drvo sa velikom krosnjom od lopte i cilindra 
+	  sve funkcije su smestene u fajl drvece.c
+	- dodata je mogucnost skupljanja zivota, tj. poena, za svako prelazenje ulice, i na pocetku igrac ima tri zivota
+	- da bi se realizovali zivoti i kako bi korisnik znao koliko zivota ima dodat je fajl poeni.c koji crta kockice koje predstavljaju koliko zivota igrac ima u svakom trenutku
+	- omoguceno kada igrac predje na drugu stranu ulice da se vrati na pocetnu poziciju
+	- ako korisnik padne sa table(ode previse levo i desno) gubi zivot i ponovo se crta na pocetnoj poziciji
+	- dodate su ravni odsecanja na stranama
+
+Dodati su komentari u fajlovima
+
+Fajlovi: main.c igrac.c ulica.c kamion.c auto.c kolizije.c image.c trava.h drvece.c poeni.c Makefile
+		 main.h igrac.h ulica.h kamion.h auto.h kolizije.h image.h trava.h drvece.h poeni.h
+
+
+
