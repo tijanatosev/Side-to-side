@@ -1,4 +1,4 @@
-#include "auto.h"
+#include "car.h"
 
 void draw_sidewindow1(float x, float y, float z) {
 	glPushMatrix();
@@ -7,7 +7,7 @@ void draw_sidewindow1(float x, float y, float z) {
 		GLfloat light_diffuse[] = { 1, 1, 1, 1 };
 		GLfloat light_specular[] = { 1, 1, 1, 1 };
 
-		GLfloat prozor[] = {0.7, 0.7, 0.7, 1};
+		GLfloat window[] = {0.7, 0.7, 0.7, 1};
 		GLfloat diffuse_coeffs[] = { 0.1, 0.5, 0.9, 1 };
 		GLfloat specular_coeffs[] = { 1, 1, 1, 1 };
 		GLfloat shininess = 100;
@@ -18,7 +18,7 @@ void draw_sidewindow1(float x, float y, float z) {
 	    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
 	    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 	    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-	    glMaterialfv(GL_FRONT, GL_AMBIENT, prozor);
+	    glMaterialfv(GL_FRONT, GL_AMBIENT, window);
 	    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
 	    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_coeffs);
 	    glMaterialf(GL_FRONT, GL_SHININESS, shininess);	
@@ -41,13 +41,12 @@ void draw_backlamp1(float x, float y, float z) {
 }
 void draw_windsheield1(float x, float y, float z) {
 	glPushMatrix();
-		// osvetljenje 
 		GLfloat light_position[] = { 1, 1, 1, 0 };
 		GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1 };
 		GLfloat light_diffuse[] = { 1, 1, 1, 1 };
 		GLfloat light_specular[] = { 1, 1, 1, 1 };
 
-		GLfloat prozor[] = {0.7, 0.7, 0.7, 1};
+		GLfloat window[] = {0.7, 0.7, 0.7, 1};
 		GLfloat diffuse_coeffs[] = { 0.1, 0.5, 0.9, 1 };
 		GLfloat specular_coeffs[] = { 1, 1, 1, 1 };
 		GLfloat shininess = 100;
@@ -58,7 +57,7 @@ void draw_windsheield1(float x, float y, float z) {
 	    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
 	    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 	    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-	    glMaterialfv(GL_FRONT, GL_AMBIENT, prozor);
+	    glMaterialfv(GL_FRONT, GL_AMBIENT, window);
 	    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
 	    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_coeffs);
 	    glMaterialf(GL_FRONT, GL_SHININESS, shininess);
@@ -71,14 +70,13 @@ void draw_windsheield1(float x, float y, float z) {
     glPopMatrix();
 }
 void draw_headlamp1(float x, float y, float z) {
-	glPushMatrix();
-		// osvetljenje 								
+	glPushMatrix();						
 		GLfloat light_position[] = { 1, 1, 1, 0 };
 		GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1 };
 		GLfloat light_diffuse[] = { 0.7, 0.7, 0.7, 1 };
 		GLfloat light_specular[] = { 0.9, 0.9, 0.9, 1 };
 
-		GLfloat svetlo[] = {1.0, 1.0, 1.0, 1};
+		GLfloat headlamp[] = {1.0, 1.0, 1.0, 1};
 		GLfloat diffuse_coeffs[] = { 0.1, 0.1, 0.1, 1 };
 		GLfloat specular_coeffs[] = { 1, 1, 1, 1 };
 		GLfloat shininess = 10;
@@ -89,7 +87,7 @@ void draw_headlamp1(float x, float y, float z) {
 	    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
 	    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 	    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-	    glMaterialfv(GL_FRONT, GL_AMBIENT, svetlo);
+	    glMaterialfv(GL_FRONT, GL_AMBIENT, headlamp);
 	    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
 	    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_coeffs);
 	    glMaterialf(GL_FRONT, GL_SHININESS, shininess);
@@ -101,9 +99,9 @@ void draw_headlamp1(float x, float y, float z) {
 		glBegin(GL_TRIANGLE_FAN);
 		    int i;
 		    for (i = 0; i < 360; i++) {
-		        float ugao = 2 * 3.141592653589793 * i / 360;
-		        glNormal3f(cos(ugao), 0, sin(ugao));
-		        glVertex3f(cos(ugao), 0, sin(ugao));
+		        float angle = 2 * 3.141592653589793 * i / 360;
+		        glNormal3f(cos(angle), 0, sin(angle));
+		        glVertex3f(cos(angle), 0, sin(angle));
 		    }
 		glEnd();
 
@@ -112,13 +110,12 @@ void draw_headlamp1(float x, float y, float z) {
 }
 void draw_wheel1(float x, float y, float z) {
 	glPushMatrix();
-		// osvetljenje 
 		GLfloat light_position[] = { 0, 0, 0, 0 };
 		GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1 };
 		GLfloat light_diffuse[] = { 0.7, 0.7, 0.7, 1 };
 		GLfloat light_specular[] = { 0.9, 0.9, 0.9, 1 };
 
-		GLfloat tocak[] = {0.1, 0.5, 0.1, 1};
+		GLfloat wheel[] = {0.1, 0.5, 0.1, 1};
 		GLfloat diffuse_coeffs[] = { 0.1, 0.1, 1.0, 1 };
 		GLfloat specular_coeffs[] = { 1, 1, 1, 1 };
 		GLfloat shininess = 10;
@@ -129,7 +126,7 @@ void draw_wheel1(float x, float y, float z) {
 	    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
 	    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 	    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-	    glMaterialfv(GL_FRONT, GL_AMBIENT, tocak);
+	    glMaterialfv(GL_FRONT, GL_AMBIENT, wheel);
 	    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
 	    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_coeffs);
 	    glMaterialf(GL_FRONT, GL_SHININESS, shininess);

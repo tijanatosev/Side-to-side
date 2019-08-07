@@ -4,134 +4,137 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "ulica.h"
-#include "igrac.h"
-#include "kamion.h"
-#include "auto.h"
-#include "kolizije.h"
+#include "street.h"
+#include "player.h"
+#include "truck.h"
+#include "car.h"
+#include "collisions.h"
 #include "image.h"
-#include "trava.h"
-#include "poeni.h"
-#include "drvece.h"
-#include "tekst.h"
+#include "grass.h"
+#include "points.h"
+#include "trees.h"
+#include "text.h"
 
 #define FILENAME0 "4.bmp"
 
-//niz za strukture
+// array for structures
 GLuint names[1];
 
 #define TIMER_ID 0
 #define TIMER_INTERVAL 20
 #define max 20
 
-//struktura za crvena kola - prva traka
-typedef struct Kamion{
-	//x, y, z koordinate 
+// struct for red car - first lane
+typedef struct Red{
+	// x, y, z coordinates
 	float x_curr, y_curr, z_curr;
-	//parametri sirine i duzine
-	float w, d;
-	//oznaka kamiona u nizu
+	// width and length
+	float w, l;
+	// id of the car in the lane
 	int id;
-}Kamion;
+}Red;
 
-//struktura za plava kola - druga traka
-typedef struct Kola{
-	//x, y, z koordinate 
+// struct for blue car - second lane
+typedef struct Blue{
+	// x, y, z coordinates
 	float x_curr, y_curr, z_curr;
-	//parametri sirine i duzine
-	float w, d;
-	//oznaka kola u nizu
+	// parameters width and length
+	float w, l;
+	// if of the car in the lane
 	int id;
-}Kola;
+}Blue;
 
-//struktura za kombinovana crvena i plava kola - treca traka
-typedef struct Oba{
-	//x, y, z koordinate 
+// struct for the cars in third lane - blue and red cars
+typedef struct Combination{
+	// x, y, z coordinates
 	float x_curr, y_curr, z_curr;
-	//parametri sirine i duzine
-	float w, d;
-	//oznaka automobila u nizu
+	// parameters width and length
+	float w, l;
+	// id of the cars in the lane
 	int id;
-}Oba;
+}Combination;
 
-//struktura koja sluzi za prethodne koordinate objekata
+// struct for previous coordinates of objects 
 typedef struct prev{
 	float x_prev, y_prev, z_prev;
-	float w, d;
+	float w, l;
 }prev;
 
-// potrebni nizovi za pravljenje kola
-struct Kamion kamioni[max];
-struct Kola kola[max];
-struct Oba oba[max];
+// arrays for creating cars
+struct Red red_cars[max];
+struct Blue blue_cars[max];
+struct Combination comb_cars[max];
 
-// nizovi za prethodne koordinate kola
+// arrays for previous coordinates of the cars
 struct prev aprev[max];
 struct prev bprev[max];
 struct prev cprev[max];
 
 static int window_width, window_height;
-// indikator animacije
+// indicator of animation
 static int animation_ongoing;
 
-// parametri za trake - pomeranje kola
+// parameters for the lanes - moving the cars
 static float a[max]; // I
 static float b[max]; // II
 static float c[max]; // III
 
 static int i;
 
-// koordinate za trake
+// coordinates for the lanes
 static float t1 = 3.8;
 static float t2 = 2.6;
-float kraj = 0.2; //pozicija kad igrac predje na drugu stranu
 
-//igrac na pocetku ima 3 zivota
-int zivot = 3;
+// position of the player when he crosses on 
+// the other side of the street
+float end = 0.2; 
 
-// indikator koji sluzi za crtanje teksta game over
-// kako se animacija ne bi odmah ugasila vec da saceka 1 milisekundu
-// i onda da se ugasi animacija pomocu exit(1);
-int poginuo = 0;
+// at the beginning player has 3 lives
+int life = 3;
 
-// indikator koji govori da je program upravo pokrenut i da nije
-// pritisnut nijedan taster jos uvek
-int pocetak = 1;
+// this variable is indicator for drawing text "GAME OVER" 
+// and animation doesn't shut down immediately but it waits 
+// 1 ms and then closes with exit(1)
+int dead = 0;
 
-// indikator koji oznacava da je pritisnut taster esc i kako bi se
-// pozvala funkcije bye()
-int izlazak = 0;
+// this variable is indicator for when program just started 
+// and none of the keys aren't pressed still
+int beginning = 1;
 
-// indikator koji oznacava da je pritisnut taster p i da bi se zato
-// pozvala funkcija paused() i ispisao odgovarajuci tekst
-int pauza = 0;
+// this variable is indicator which is used when key >>ESC<<
+// is pressed so function bye() could be called
+int exiting = 0;
 
-//	koordinate za igraca - curr
+// this indicator is used when key >>p<< is pressed and
+// function paused() could be called
+int game_pause = 0;
+
+// coordinates for the player - current
 float pX = 0;
 float pY = 0.4;
 float pZ = 5.0;
 
-// prethodne koordinate za igraca - prev
+// previous coordintaes for the player
 static float x_prev;
 static float y_prev;
 static float z_prev;
 
-// callback funkcije
+// callback functions
 static void on_keyboard(unsigned char c, int x, int y);
 static void on_reshape(int width, int height);
 static void on_display(void);
 static void on_timer();
 
-// funkcija koja izlazi iz programa nakon sto igrac izgubi sve zivote
-static void gotovo(void);
+// funciton that exits the program after player loses all the lives
+static void done(void);
 
-// funkcija za crtanje kola na tabli
+// function for drawing cars on the street
 static void cars();
 
-// funkcija za inicijalizaciju texutura
+// fumction for initialization of the textures
 static void initialize(void);
 
-// funkcija za inicijalizaciju nizova i koordinata
+// function for initialization arrays and coordinates
 static void init(int ind);
 
 int main(int argc, char** argv) {
@@ -160,82 +163,78 @@ int main(int argc, char** argv) {
 
 static void init(int ind) {
 	if (ind == 0) {	
-		// ovaj if sluzi ako smo pozvali init iz main-a ili zbog resetovanja animacije,
-		// da postavi vrednosti koordinata na pocetne i da postavi zivote na 3,
-		// a smo pozvali init zbog pokretanja kola ispocetka onda je potrebno da ne menjamo
-		// vrednost zivota i da ne vracamo igraca na pocetnu poziciju
-		zivot = 3;
+		// this if is used if we called init() from the main or for resetting the animation,
+		// here we set:
+		// 		life and current coordinates for the player 
+		// in case we called init() for drawing cars again then we don't need to change life 
+		// and current coordinates of the player
+		life = 3;
 		pX = 0;
 		pY = 0.4;
 		pZ = 5.0;
 	}
 	int k;
-	//inicijaliziju se parametri kola
+	// initialization of the cars 
 	for(k = 0; k < max; k++) {
-		kamioni[k].x_curr = 0;
-		kamioni[k].y_curr = 0.8;
-		kamioni[k].z_curr = 4;
-		kamioni[k].w = 1.5;
-		kamioni[k].d = 1;
-		kamioni[k].id = k;
+		red_cars[k].x_curr = 0;
+		red_cars[k].y_curr = 0.8;
+		red_cars[k].z_curr = 4;
+		red_cars[k].w = 1.5;
+		red_cars[k].l = 1;
+		red_cars[k].id = k;
 
-		kola[k].x_curr = 0;
-		kola[k].y_curr = 0.8;
-		kola[k].z_curr = 2.8;
-		kola[k].w = 2;
-		kola[k].d = 1;
-		kola[k].id = k;
+		blue_cars[k].x_curr = 0;
+		blue_cars[k].y_curr = 0.8;
+		blue_cars[k].z_curr = 2.8;
+		blue_cars[k].w = 2;
+		blue_cars[k].l = 1;
+		blue_cars[k].id = k;
 	
-		oba[k].x_curr = 0;
-		oba[k].y_curr = 0.8;
-		oba[k].z_curr = 1.7;
+		comb_cars[k].x_curr = 0;
+		comb_cars[k].y_curr = 0.8;
+		comb_cars[k].z_curr = 1.7;
 		if (k % 2 == 0) {
-			oba[k].w = 2.0;
+			comb_cars[k].w = 2.0;
 		}
 		else {
-			oba[k].w = 1.5;
+			comb_cars[k].w = 1.5;
 		}
-		oba[k].d = 1;
-		oba[k].id = k;
+		comb_cars[k].l = 1;
+		comb_cars[k].id = k;
 	}
 
 	int m;
-	//petlja za odredjivanje pocetne pozicije kola
+	// this for is used for setting initial position of the cars
 	for (m = 0; m < max; m++) {
 		a[m] = 21;
 		b[m] = 20;
 		c[m] = 22;
 	}
     
-    //vracanje zivota na pocetno stanje
-    zivot = 3;
+    // returning variable life at initial state
+    life = 3;
 }
 
 void initialize(void)
 {
-	// funkcija initialize je preuzeta sa casa
-    /* Objekat koji predstavlja teskturu ucitanu iz fajla. */
+	// function initialize is taken from class "Computers graphics"
+
+    // object that represents texture loaded from the file
     Image * image;
 
-    /* Ukljucuju se teksture. */
+    // enabling textures
     glEnable(GL_TEXTURE_2D);
 
-    /*
-     * Podesava se rezim iscrtavanja tekstura tako da boje na teksturi
-     * potpuno odredjuju boju objekata.
-     */
+    // setting mode of drawing the textures
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-    /*
-     * Inicijalizuje se objekat koji ce sadrzati teksture ucitane iz
-     * fajla.
-     */
+    // initialization of image object
     image = image_init(0, 0);
 
-    /* Kreira se prva tekstura. */
+    // creating the texture
     image_read(image, FILENAME0);
 
-    /* Generisu se identifikatori tekstura. */
+    // generating indetificator of the texture
     glGenTextures(1, names);
 
     glBindTexture(GL_TEXTURE_2D, names[0]);
@@ -247,13 +246,13 @@ void initialize(void)
                  image->width, image->height, 0,
                  GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
 
-    /* Iskljucujemo aktivnu teksturu */
+    // closing the active texture
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    /* Unistava se objekat za citanje tekstura iz fajla. */
+    // destroying object for reading the texture from file
     image_done(image);
 
-    /* Inicijalizujemo matricu rotacije. */
+    // initialization of rotation matrix
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
@@ -261,42 +260,46 @@ void initialize(void)
 static void on_keyboard(unsigned char c, int x, int y) {
 	switch(c) {
 		case 27:
-            // indikator da je pritisnut taster esc i za pozivanje
-            // funkcije bye();
-            izlazak = 1;
-            // provera ako je pre toga bio pritisnut taster p i ako
-            // jeste promena indikatora pauza na 0 kako se ne bi ispisao
-            // novi tekst preko vec napisanog teksta
-            if (pauza == 1)
-                pauza = 0;
-            // moram ponovo da pozovem funkciju on_display() kako bi se 
-            // iscrtala poruka o prekidanju programa
+			// indicator that key >>ESC<< is pressed and function 
+			// bye() should be called
+            exiting = 1;
+            
+            // this if is used to check if before this key >>p<< was
+            // pressed and if it was we change pause to 0 and new text
+            // won't be written over already written text
+            if (game_pause == 1)
+                game_pause = 0;
+            
+            // function on_display() is called again so text about exiting 
+            // the animation is written
             on_display();
             sleep(1);
 			glDeleteTextures(1, names);
 			exit(0);
 			break;
+
 		case 'd':
 		case 'D':
-			//pomeranje igraca desno
-			//igrac moze da se krece desno samo onim delom ulice koji je vidljiv
+			// moving the player to the right and he can move only to
+			// the right where the street is shown
 			glPushMatrix();
 				if (pX >= 9) {
 					pX = 0;
-					zivot--;
+					life--;
 				}
 				pX += 1;
 			glPopMatrix();
 			glutPostRedisplay();
 			break;
+
 		case 'a':
 		case 'A':
-			//pomeranje igraca levo
-			//igrac moze da se krece levo samo onim delom ulice koji je vidljiv
+			// moving the player to the left and he can move only to
+			// the left where the street is shown
 			glPushMatrix();
 				if (pX <= -9) {
 					pX = 0;
-					zivot--;
+					life--;
 				}
 				pX -= 1;
 			glPopMatrix();
@@ -305,7 +308,7 @@ static void on_keyboard(unsigned char c, int x, int y) {
 
 		case 'w':
 		case 'W':
-			//pomeranje igraca napred
+			// moving player forward 
 			glPushMatrix();
 				if (pZ <= 0.2) {
 					pZ = 6.2;
@@ -314,9 +317,10 @@ static void on_keyboard(unsigned char c, int x, int y) {
 			glPopMatrix();
 			glutPostRedisplay();
 			break;
+
 		case 's':
 		case 'S':
-			//pomeranje igraca napred
+			// moving player backward
 			glPushMatrix();
 				if (pZ >= 4.0) {
 					pZ = 3.8;
@@ -328,9 +332,13 @@ static void on_keyboard(unsigned char c, int x, int y) {
 
 		case 'g':
         case 'G':
-        	// pokretanje animacije i postavljanje indikatora pauza na 0
+        	// pokretanje animacije i postavljanje indikatora pause na 0
             // kako se ne bi iscrtavala poruka "PRESS G TO UNPAUSE"
-            pauza = 0;
+
+        	// starting the animation and setting indicator pause to 0
+        	// because we don't want to show message "PRESS G TO UNPAUSE"
+        	// on the screen
+            game_pause = 0;
             if (!animation_ongoing) {
 				glutTimerFunc(TIMER_INTERVAL, on_timer, TIMER_ID);
 				animation_ongoing = 1;
@@ -339,15 +347,14 @@ static void on_keyboard(unsigned char c, int x, int y) {
 
 		case 'p':
 		case 'P':
-			// zaustavljanje animacije
-            pauza = 1;
+			// stopping animation
+            game_pause = 1;
 			animation_ongoing = 0;
 			break;
 
 		case 'r':
 		case 'R':
-			// resetovanje animacije
-			// nije potrebno ponovo pokretanje animacije kada se resetuje
+			// resetting animation
 			init(0);
 			animation_ongoing = 1;
 			break;
@@ -365,9 +372,9 @@ static void on_reshape(int width, int height) {
 	glMatrixMode(GL_MODELVIEW);
 }
 
-static void gotovo() {
-    // funkcija koja poziva sleep kako bi se videla iscrtana poruka
-    // i zatim ugasila animacija
+static void done() {
+    // here we call function sleep because we want to show message
+    // on the screen and then to shut down animation
     sleep(1);
     glDeleteTextures(1, names);
     exit(1);
@@ -382,34 +389,32 @@ static void on_display(void) {
 			  0, 0, pZ/4,
 			  0, 1, 0);
 
-    // provera da li je tek pokrenut program i pozivanje funkcije koja
-    // ispisuje instrukciju za pokretanje animacije
-    if (pocetak == 1)
-        begining();  
-    
-    // provera da li je pritisnut taster esc i pozivanje funkcije koja
-    // ispisuje tekst na ekranu "GOOD BYE" i "THANK YOU FOR PLAYING"
-    if (izlazak == 1) {
+    // checking if program started and calling function that
+    // draws instructions for beginning the animation
+    if (beginning == 1)
+        begining();
+
+    // checking if key >>ESC<< is pressed and calling function
+    // that draws messages "GOOD BYE" and "THANK YOU FOR PLAYING"
+    if (exiting == 1) {
         bye();
         thankyou();
     }
     
-    // provera da li je pritisnut taster p i pozivanje funkcije paused()
-    // koja ispisuje tekst "PRESS G TO UNPAUSE"
-    if (pauza == 1)
+    // checking if animation is paused
+    if (game_pause == 1)
         paused();
     
+
+    // here are to planes that cut off end of the street on both sides
+    // so it seems like cars are getting out of the tunnel
 	glPushMatrix();
-		//dodala sam ravan koja odseca kraj ulice kako bi
-		//izgledalo kao da automobili izlaze iz tunela
 		double clip_plane0[] = {1, 0, 0, 0};
 		glTranslatef(-25, 0, 0);
     	glClipPlane(GL_CLIP_PLANE0, clip_plane0);
     glPopMatrix();
 
     glPushMatrix();
-		//dodala sam ravan koja odseca kraj ulice kako 
-    	//se ne bi videlo da izlaze
 		double clip_plane1[] = {-1, 0, 0, 0};
 		glTranslatef(25, 0, 0);
     	glClipPlane(GL_CLIP_PLANE1, clip_plane1);
@@ -418,30 +423,25 @@ static void on_display(void) {
     glEnable(GL_CLIP_PLANE0);
     glEnable(GL_CLIP_PLANE1);
 
-    //postavljam ulicu na tablu
+    // placing street on the screen
 	glPushMatrix();
 		glTranslatef(-28, 0, 0);
 		draw_street();
 	glPopMatrix();
 
-	//postavljam igraca na tablu
+	// placing the player on initial position
 	glPushMatrix();
 		glTranslatef(0.0, 0.0, 0.0);
 		player(pX, pY, pZ);
 	glPopMatrix();
 
-	//poziva se funkcija za crtanje trave
+	// placing grass on the screen
 	draw_grass();
-    
-	//poziva se funkcija za crtanje zivota igraca
-	//koji se nalaze iznad table i kako se pomera igrac 
-	//tako se i pomeraju zivoti
+
+	// drawing points on the screen
 	draw_points();
 
-	//postavljam drvece na tablu
-	//(pokusala sam jos drveca da nacrtam ali jako usporava kretanja
-	// tako da sam nacrtala samo na onom delu table koji je vidljiv 
-	// u odnosu na poziciju kamere)
+	// placing trees on the screen 
 	glPushMatrix();
 		draw_tree(1, -17, 2, -7);
 		draw_tree(1, 18, 2, -9);
@@ -459,74 +459,72 @@ static void on_display(void) {
 		draw_tree(2, 4, 0, 6.5);
 	glPopMatrix();
 
-	//funkcija za iscrtavanje kola na ulici
+	// function for drawing cars on the street
 	cars();
 
 	glDisable(GL_CLIP_PLANE0);
 	glDisable(GL_CLIP_PLANE1);
 	
-    
-    // provera da li je igrac izgubio sve zivote kako bi se ispisao tekst 
-    // "GAME OVER" i nakon toga izaslo iz prozora
-    if (zivot == 0) {
-        // poziv funkcije koja ispisuje tekst "GAME OVER"
+    // here we check if the player lost all his lives and if so message is
+    // drawn on the screen and after that window is closed
+    if (life == 0) {
+        // function gameover() draws text "GAME OVER"
         gameover();
-        poginuo += 1;
-        // ovaj poziv glutPostRedisplay() je potreban kako bi se promenila
-        // vrednost indikatora poginuo i na taj nacin usao u if i pozvao 
-        // funkciju gotovo
+        dead += 1;
+        // this call of glutPostRedisplay() is needed because value of indicator
+        // dead must change so it can go to other if and call function done()
         glutPostRedisplay();
     }
     
-    // koristi se indikator poginuo kako bi se sacekalo da se ispise tekst
-    // na ekranu i kako se ne bi odmah iskljucio prozor 
-    if (poginuo > 2)
-        // poziv funkcije koja izlazi iz programa i izvrsava sleep()
-        gotovo();
+    // this indicator dead is used for waiting to draw text on the screen
+    // and to wait to close the window
+    if (dead > 2)
+        done();
     
 	glutSwapBuffers();
 }
-// funkcija za iscrtavanje kola i kamiona na ulici
+
 static void cars() {
-	// ako je poslednji kamion u trecoj traci dosao do pozicije kada je
-	// x koordinata >= 45 onda se poziva funkcija init
-	// i kretanje kola pocinje iz pocetka
-	// (nisam uspela nikako drugacije da namestim kretanje kola ispocetka
-	//  osim na ovaj nacin, tako da kad se to dogodi jasno se vidi da se
-	//  dogodila ova inicijalizacija)
-	if (oba[20].x_curr >= 35) {
+	// in this function we draw cars on the street
+
+	// if the last car in the third lane got to the position when x coordinate
+	// is greater of equal to 45 then function init() is called and moving of
+	// the cars start start from the beginning 
+	if (comb_cars[20].x_curr >= 35) {
 		init(1);
 		animation_ongoing = 1;
 		glutPostRedisplay();
 	}
-	// za svaku traku se racunaju nove koordinate kola na osnovu parametra
-	// koji je odredjen za svaku traku
+
+	// for each lane new coordinates are calculated for the cars based on the
+	// paremeters specified for each lane
 	for (i = 0; i < max; i++) {
 		glPushMatrix();
-			kamioni[i].x_curr = a[i] - i*4; //oduzimam i*4 kako bi kamioni bili razdvojeni
-			kamioni[i].w *= 0.7;
-			kamioni[i].d *= 0.7;
-			glTranslatef(kamioni[i].x_curr, kamioni[i].y_curr, kamioni[i].z_curr);
+			// we substract i*4 so the cars are separated by space
+			red_cars[i].x_curr = a[i] - i*4;
+			red_cars[i].w *= 0.7;
+			red_cars[i].l *= 0.7;
+			glTranslatef(red_cars[i].x_curr, red_cars[i].y_curr, red_cars[i].z_curr);
 			glScalef(0.7, 0.7, 0.7);
 			draw_truck();
 		glPopMatrix();
 
 		glPushMatrix();
-			kola[i].x_curr = b[i] - i*4;
-			kola[i].w *= 0.7;
-			kola[i].d *= 0.7;
-			glTranslatef(kola[i].x_curr, kola[i].y_curr, kola[i].z_curr);
+			blue_cars[i].x_curr = b[i] - i*4;
+			blue_cars[i].w *= 0.7;
+			blue_cars[i].l *= 0.7;
+			glTranslatef(blue_cars[i].x_curr, blue_cars[i].y_curr, blue_cars[i].z_curr);
 			glScalef(0.7, 0.7, 0.7);
 			draw_car1();
 		glPopMatrix();
 
 		glPushMatrix();
-			oba[i].x_curr = c[i] - i*4;
-			oba[i].w *= 0.7;
-			oba[i].d *= 0.7;
-			glTranslatef(oba[i].x_curr, oba[i].y_curr, oba[i].z_curr);
+			comb_cars[i].x_curr = c[i] - i*4;
+			comb_cars[i].w *= 0.7;
+			comb_cars[i].l *= 0.7;
+			glTranslatef(comb_cars[i].x_curr, comb_cars[i].y_curr, comb_cars[i].z_curr);
 			glScalef(0.7, 0.7, 0.7);
-			// pozivam crtanje kamiona ili kola u zavisnosti od parnosti parametra i
+			// based on indicator i we draw red or blue car
 			if (i % 2 == 0) {
 				draw_car1();
 			}
@@ -541,92 +539,93 @@ static void on_timer() {
 
 	int j;
     for (j = 0; j < max; j++) {
-    	//pamtim koordinate svih kola jer su potrebne za ispitivanje kolizija
-    	aprev[j].x_prev = kamioni[j].x_curr;
-    	aprev[j].y_prev = kamioni[j].y_curr;
-    	aprev[j].z_prev = kamioni[j].z_curr;
-    	aprev[j].w = kamioni[j].w;
-    	aprev[j].d = kamioni[j].d;
+    	// we store current coordinates of the cars because we need it for
+    	// detection of collisions with the player
+    	aprev[j].x_prev = red_cars[j].x_curr;
+    	aprev[j].y_prev = red_cars[j].y_curr;
+    	aprev[j].z_prev = red_cars[j].z_curr;
+    	aprev[j].w = red_cars[j].w;
+    	aprev[j].l = red_cars[j].l;
 
-    	bprev[j].x_prev = kola[j].x_curr;
-    	bprev[j].y_prev = kola[j].y_curr;
-    	bprev[j].z_prev = kola[j].z_curr;
-    	bprev[j].w = kola[j].w;
-    	bprev[j].d = kola[j].d;
+    	bprev[j].x_prev = blue_cars[j].x_curr;
+    	bprev[j].y_prev = blue_cars[j].y_curr;
+    	bprev[j].z_prev = blue_cars[j].z_curr;
+    	bprev[j].w = blue_cars[j].w;
+    	bprev[j].l = blue_cars[j].l;
 
-    	cprev[j].x_prev = oba[j].x_curr;
-    	cprev[j].y_prev = oba[j].y_curr;
-    	cprev[j].z_prev = oba[j].z_curr;
-    	cprev[j].w = oba[j].w;
-    	cprev[j].d = oba[j].d;
-
-    	//parametri animacije
+    	cprev[j].x_prev = comb_cars[j].x_curr;
+    	cprev[j].y_prev = comb_cars[j].y_curr;
+    	cprev[j].z_prev = comb_cars[j].z_curr;
+    	cprev[j].w = comb_cars[j].w;
+    	cprev[j].l = comb_cars[j].l;
+    	
     	a[j] += 0.08;
     	b[j] += 0.06;
     	c[j] += 0.08;
-
     }
-    //pamtim koordinate igraca jer su potrebne da proveravanje kolizija igraca i kola
+    // we store current coordinates of the player because we need it for
+    // checking of collisions of the player and the cars
     x_prev = pX;
     y_prev = pY;
     z_prev = pZ;
 
-    //provera kolizija sa kolima na odredjenoj traci
-    //ako dodje do kolizije igrac se postavlja na pocetnu poziciju
+    // here we check if collision happend on specific lane and if so
+    // then the player is placed on initial position and he loses one life
 	for (j = 0; j < max; j++) {
 		if (z_prev == t1) {
-			//ako se igrac nalazi na prvoj traci
-			if (collision_detection(x_prev, z_prev, aprev[j].x_prev, aprev[j].z_prev, aprev[j].w, aprev[j].d) != 0) {
+			// if the player is in the first lane we check for collisions
+			if (collision_detection(x_prev, z_prev, aprev[j].x_prev, aprev[j].z_prev, aprev[j].w, aprev[j].l) != 0) {
 	    		pX = 0;
 	    		pZ = 5;
-	    		if (zivot == 0) {
+	    		if (life == 0) {
 	    			animation_ongoing = 0;
 	    			break;
 	    		}
-	    		zivot--;
+	    		life--;
 	    		break;
     		}
     	}
 	    else if (z_prev == t2) {
-	    	//ako se igrac nalazi na drugoj traci
-	    	if (collision_detection(x_prev, z_prev, bprev[j].x_prev, bprev[j].z_prev, bprev[j].w, bprev[j].d) != 0) {
+	    	// if the player is in the second lane we check for collisions
+	    	if (collision_detection(x_prev, z_prev, bprev[j].x_prev, bprev[j].z_prev, bprev[j].w, bprev[j].l) != 0) {
 	    		pX = 0;
 	    		pZ = 5;
-	    		if (zivot == 0) {
+	    		if (life == 0) {
 					animation_ongoing = 0;
 	    			break;
 	    		}
-	    		zivot--;
+	    		life--;
 	    		break;
     		}
     	}
     	else if (z_prev != t1 && z_prev != t2) {
-    		//ako se igrac nalazi na trecoj traci
-    		if (collision_detection(x_prev, z_prev, cprev[j].x_prev, cprev[j].z_prev, cprev[j].w, cprev[j].d) != 0) {
+    		// if the player is in the third lane we check for collisions
+    		if (collision_detection(x_prev, z_prev, cprev[j].x_prev, cprev[j].z_prev, cprev[j].w, cprev[j].l) != 0) {
     			pX = 0;
     			pZ = 5;
-    			if (zivot == 0) {
+    			if (life == 0) {
 					animation_ongoing = 0;
 	    			break;
     			}
-    			zivot--;
+    			life--;
     			break;
     		}
     	}
 	}
-	// ako je igrac izgubio sve zivote izlazi se iz programa ali se pre toga
-	// poziva funkcija gameover() u funkciji on_display()
-	if (zivot == 0) {
+	// if the player lost all of the lives then we exit the animation but
+	// before the calling of function gameover() we have to call function
+	// on_display()
+	if (life == 0) {
         draw_points();
 		animation_ongoing = 0;
-        // indikator za proveru u on_display() funkciji za iscrtavanje teksta
-        poginuo = 1;
+        dead = 1;
 	}
 
-	// ako je igrac stigao na drugi kraj ulice - dobija zivot 
-	// i postavlja se na pocetnu poziciju
-	if (fabs(z_prev - kraj) < 0.000001) {
-		zivot++;
+
+	// if player got to the other side of the street then he gets a life
+	// and it's placed on the initial position
+	if (fabs(z_prev - end) < 0.000001) {
+		life++;
 		pX = 0;
 		pZ = 5;
 	}

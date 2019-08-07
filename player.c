@@ -1,9 +1,9 @@
-#include "igrac.h"
+#include "player.h"
 
 void player(float x, float y, float z) {
 	glPushMatrix();
-		//osvetljenje igraca - sfere
-		//podesavanje koeficijenata za osvetljenje i materijal
+		// player is a sphere and here we set parameters for
+		// light and material
 		GLfloat light_position[] = { 1, 1, 0, 0 };
 	    GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1 };
 	    GLfloat light_diffuse[] = { 0.7, 0.7, 0.7, 1 };
@@ -14,7 +14,6 @@ void player(float x, float y, float z) {
 	    GLfloat specular_coeffs[] = { 1, 1, 1, 1 };
 	   	GLfloat shininess = 40;
 
-	   	//podesavanje svetla i materijala
 	    glEnable(GL_LIGHTING);
 	    glEnable(GL_LIGHT0);
 		    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -26,7 +25,7 @@ void player(float x, float y, float z) {
 		    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_coeffs);
 		    glMaterialf(GL_FRONT, GL_SHININESS, shininess);
 		
-		//postavljanje i crtanje sfere na date koordinate
+		// placing and drawing sphere on set coordinates
 		glTranslatef(x, y, z);
 		glutSolidSphere(0.3, 40, 40);
 		glDisable(GL_LIGHTING);

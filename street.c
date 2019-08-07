@@ -1,4 +1,4 @@
-#include "ulica.h"
+#include "street.h"
 
 void draw_floor(float length, float w1, float w2) {
 	glPushMatrix();
@@ -13,8 +13,8 @@ void draw_floor(float length, float w1, float w2) {
 }
 
 void draw_line(float length, float w1, float w2, float d) {
+// sidewalkd
 	glPushMatrix();
-		//ivicnjak
 		glColor3f(0.1, 0.1, 0.1);
 		glLineWidth(4);
 		glBegin(GL_LINES);
@@ -27,8 +27,8 @@ void draw_line(float length, float w1, float w2, float d) {
 }
 
 void draw_sidewalk(float length, float d, float w1, float w2) {
+	// further
 	glPushMatrix();
-		//		dalji
 		glColor3f(0.15, 0.15, 0.15);
 		glBegin(GL_POLYGON);
 			glVertex3f(   0.0, 0.001, w1);
@@ -38,8 +38,8 @@ void draw_sidewalk(float length, float d, float w1, float w2) {
 		glEnd();
 	glPopMatrix();
 	
+	// near
 	glPushMatrix();
-		//		blizi
 		glColor3f(0.15, 0.15, 0.15);
 		glBegin(GL_POLYGON);
 			glVertex3f(   0.0, 0.001, w2 - d);
@@ -52,7 +52,6 @@ void draw_sidewalk(float length, float d, float w1, float w2) {
 
 void draw_strips(float length) {
 	glPushMatrix();
-		//trake
 		glColor3f(1, 1, 1);
 		glBegin(GL_LINES);
 		glLineWidth(2);
@@ -62,7 +61,7 @@ void draw_strips(float length) {
 				glVertex3f(i, 0.0001, 1.9);
 				k++;
 				if (k == 2) {
-					//ako su nacrtane dve tacke dodaj razmak za sledece dve
+					// if two dots are drawn add space for the next two
 					k = 0;
 					i += 0.5;
 				}
@@ -88,9 +87,12 @@ void draw_strips(float length) {
 }
 
 void draw_street() {
-	//kada se bira duzina ulice mora se izracunati koliko traka zelimo da imamo
-	//ako hocemo 15 belih crta, onda to mnozimo sa 1.2 i onda dodajemo jos
-	//14 razmaka, tj. 14 * 0.5
+	// when we are choosing length of the street then we have to calculate
+	// how many strips on the street will be drawn
+	// example: if we want 15 strips then first we multiply 15 with 1.2, 
+	// after that we want 14 spaces between the strips and we multiply
+	// 14 with 0.5, finanlly we add those numbers and get: 25
+
 	draw_floor(59.1, -0.5, 5.5);
 	
 	draw_line(59.1, -0.5, 5.5, 1.2);

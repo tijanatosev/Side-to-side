@@ -1,14 +1,14 @@
-#include "poeni.h"
+#include "points.h"
 
-// promenljiva koja cuva broj zivota igraca
-extern int zivot;
-// koordinata igraca koja nam je potreba za pomeranje kockica po Z osi
+// variable which indicates numbers of lives player have
+extern int life;
+// coordiante of the player we need for moving cubes on Z axes
 extern float pZ;
 
 void draw_points() {
 	
 	int i;
-	for (i = 0; i < zivot; i++) {
+	for (i = 0; i < life; i++) {
 		glPushMatrix();
 			GLfloat light_position[] = { -1, 0, 1, 0 };
 		    GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1 };
@@ -20,7 +20,7 @@ void draw_points() {
 		    GLfloat specular_coeffs[] = { 1, 1, 1, 1 };
 		   	GLfloat shininess = 40;
 
-		   	//podesavanje svetla i materijala
+		   	// adjusting lights and materials
 		    glEnable(GL_LIGHTING);
 		    glEnable(GL_LIGHT0);
 			    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -32,14 +32,14 @@ void draw_points() {
 			    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_coeffs);
 			    glMaterialf(GL_FRONT, GL_SHININESS, shininess);
 
-            // kada se dodaju kockice pomeraju se kako ne bi bile jedna do druge
-            // vec malo odvojene
+
+			// when cubes are added - they are translated so they are a little apart
 			glTranslatef(0.2*i*2 - 5, 5, pZ - 1);
-            // crtanje kockice
+			// drawing cubes
 			glutSolidCube(0.2);
 
-            // ponovo iskljucujemo svetlo kako se ne bi poremetilo osvetljenje
-            // celog projekta
+            // we have to disable the light in order not to change the light
+            // of the whole animation
 			glDisable(GL_LIGHTING);
 		glPopMatrix();
 	}

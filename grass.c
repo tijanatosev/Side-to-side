@@ -1,8 +1,9 @@
-#include "trava.h"
+#include "grass.h"
 
 extern GLuint names[1];
 
 void draw_grass() {
+    // drawing closer grass to the camera
     glPushMatrix();
     glBindTexture(GL_TEXTURE_2D, names[0]);
         glRotatef(90, 1, 0, 0);
@@ -23,6 +24,8 @@ void draw_grass() {
             glVertex3f(0, 25, 0);
         glEnd();
     glPopMatrix();
+
+    // drawing futrher grass from the camera
     glPushMatrix();
     glBindTexture(GL_TEXTURE_2D, names[0]);
         glRotatef(90, 1, 0, 0);

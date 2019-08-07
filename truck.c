@@ -1,14 +1,14 @@
-#include "kamion.h"
+#include "truck.h"
 
 void draw_sidewindow(float x, float y, float z) {
 	glPushMatrix();
-		// osvetljenje 
+		// the light parameters
 		GLfloat light_position[] = { 1, 1, 1, 0 };
 		GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1 };
 		GLfloat light_diffuse[] = { 1, 1, 1, 1 };
 		GLfloat light_specular[] = { 1, 1, 1, 1 };
-
-		GLfloat prozor[] = {0.7, 0.7, 0.7, 1};
+		// the material parameters
+		GLfloat window[] = {0.7, 0.7, 0.7, 1};
 		GLfloat diffuse_coeffs[] = { 0.1, 0.5, 0.9, 1 };
 		GLfloat specular_coeffs[] = { 1, 1, 1, 1 };
 		GLfloat shininess = 100;
@@ -19,7 +19,7 @@ void draw_sidewindow(float x, float y, float z) {
 	    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
 	    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 	    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-	    glMaterialfv(GL_FRONT, GL_AMBIENT, prozor);
+	    glMaterialfv(GL_FRONT, GL_AMBIENT, window);
 	    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
 	    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_coeffs);
 	    glMaterialf(GL_FRONT, GL_SHININESS, shininess);	
@@ -33,8 +33,8 @@ void draw_sidewindow(float x, float y, float z) {
     glPopMatrix();
 }
 
+// this function draws backlamp on the truck
 void draw_backlamp(float x, float y, float z) {
-    //funkcija koja crta farove na kamionu
     glPushMatrix();
         glColor3f(1.0, 1.0, 1.0);
         glTranslatef(x, y, z);
@@ -43,8 +43,8 @@ void draw_backlamp(float x, float y, float z) {
     glPopMatrix();
 }
 
+// this function draws windshiled on the truck
 void draw_windshield(float x, float y, float z) {
-    //funkcija koja crta sofersajbnu
     glPushMatrix();
     	// osvetljenje 
 		GLfloat light_position[] = { 1, 1, 1, 0 };
@@ -52,7 +52,7 @@ void draw_windshield(float x, float y, float z) {
 		GLfloat light_diffuse[] = { 1, 1, 1, 1 };
 		GLfloat light_specular[] = { 1, 1, 1, 1 };
 
-		GLfloat prozor[] = {0.7, 0.7, 0.7, 1};
+		GLfloat window[] = {0.7, 0.7, 0.7, 1};
 		GLfloat diffuse_coeffs[] = { 0.1, 0.5, 0.9, 1 };
 		GLfloat specular_coeffs[] = { 1, 1, 1, 1 };
 		GLfloat shininess = 100;
@@ -63,7 +63,7 @@ void draw_windshield(float x, float y, float z) {
 	    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
 	    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 	    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-	    glMaterialfv(GL_FRONT, GL_AMBIENT, prozor);
+	    glMaterialfv(GL_FRONT, GL_AMBIENT, window);
 	    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
 	    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_coeffs);
 	    glMaterialf(GL_FRONT, GL_SHININESS, shininess);
@@ -77,9 +77,9 @@ void draw_windshield(float x, float y, float z) {
     glPopMatrix();
 }
 
+// this function draws headlamp on the truck
 void draw_headlamp(float x, float y, float z) {
 	glPushMatrix();
-		    	// osvetljenje 
 		GLfloat light_position[] = { 1, 1, 1, 0 };
 		GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1 };
 		GLfloat light_diffuse[] = { 0.7, 0.7, 0.7, 1 };
@@ -118,15 +118,15 @@ void draw_headlamp(float x, float y, float z) {
     glPopMatrix();
 }
 
+// this function draws wheel on the truck
 void draw_wheel(float x, float y, float z) {
 	glPushMatrix();
-		// osvetljenje 
 		GLfloat light_position[] = { 0, 0, 0, 0 };
 		GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1 };
 		GLfloat light_diffuse[] = { 0.7, 0.7, 0.7, 1 };
 		GLfloat light_specular[] = { 0.9, 0.9, 0.9, 1 };
 
-		GLfloat tocak[] = {0.1, 0.1, 1.0, 1};
+		GLfloat wheel[] = {0.1, 0.1, 1.0, 1};
 		GLfloat diffuse_coeffs[] = { 0.1, 0.1, 1.0, 1 };
 		GLfloat specular_coeffs[] = { 1, 1, 1, 1 };
 		GLfloat shininess = 10;
@@ -137,7 +137,7 @@ void draw_wheel(float x, float y, float z) {
 	    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
 	    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 	    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-	    glMaterialfv(GL_FRONT, GL_AMBIENT, tocak);
+	    glMaterialfv(GL_FRONT, GL_AMBIENT, wheel);
 	    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
 	    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_coeffs);
 	    glMaterialf(GL_FRONT, GL_SHININESS, shininess);
@@ -152,14 +152,14 @@ void draw_wheel(float x, float y, float z) {
 }
 
 void draw_body() {
-	// donji deo kamiona
+	// the bottom of the truck
 	glPushMatrix();
 		glColor3f(0.6, 0.8, 0.196078);
 		glScalef(1.5, 0.5, 1.0);
 		glutSolidCube(1);
 	glPopMatrix();
 
-	// gornji deo kamiona
+	// the top of the truck
 	glPushMatrix();
 		glColor3f(1, 0, 0);
 		glScalef(1.0, 0.5, 1.0);
